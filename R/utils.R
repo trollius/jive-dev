@@ -92,13 +92,20 @@ relSim <- function(x) {
 				
 }
 
+calcLogSD <- function(x){
+
+	x <- log(apply(x, 1, sd, na.rm = T))
+	return(x)
+
+}
+
 
 ##-------------------------- initialize windows sizes functions
 initWinSizeMVN <- function (x){
 
 	ws		<- list()
 	ws$msp	<- (apply(x, 1, sd, na.rm = T))/4 # <--------------- may need further tuning
-	ws$ssp	<- apply(x, 1, sd, na.rm = T) 
+	ws$ssp	<- calcLogSD(x) 
 	
 	return(ws)
 
@@ -116,7 +123,7 @@ initWinSizeMBM <- function(x){
 
 initWinSizeVBM <- function(x){
 	
-	xx <- sd(apply(x, 1, sd, na.rm = T)) # CHECK IF ITS SD OR VAR
+	xx <- sd(calcLogSD(x)) # CHECK IF ITS SD OR VAR
 	ws <- c(xx, 2 * xx) # evol rate of sigmas window size, anc.state of sigmas windows size,
 
 	return(ws)
@@ -126,7 +133,7 @@ initWinSizeVBM <- function(x){
 # input is trait matrix, rows are species, cols - observations
 initWinSizeVOU <- function(x, nreg){
 	
-	xx <- sd(apply(x, 1, sd, na.rm = T)) # CHECK IF ITS SD OR VAR
+	xx <- sd(calcLogSD(x) ) # CHECK IF ITS SD OR VAR
 	ws <- c(1.5, xx, 2 * xx, rep(2 * xx, nreg)) # alpha from max likelihood on observed std dev <------------------------ alpha parameter to adjust
 	
 	return(ws)
@@ -139,7 +146,7 @@ initParamMVN <- function (x){
 
 	init  <- list()
 	init$mspA  <- apply(x, 1, mean, na.rm = T) # initialize means for species
-	init$sspA  <- apply(x, 1, var, na.rm = T) # initialize sigma.sq for species
+	init$sspA  <- 2*calcLogSD(x) # initialize sigma.sq for species because of the variance
 	
 	return(init)
 }

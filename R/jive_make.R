@@ -114,6 +114,8 @@ jiveMake <- function(simmap, traits, model.var="OU1", model.mean="BM", model.lik
 			jive$lik$sspws 					<- initWinSizeMVN(jive$data$traits)$ssp
 			jive$lik$mspinit				<- initParamMVN(jive$data$traits)$mspA
 			jive$lik$sspinit				<- initParamMVN(jive$data$traits)$sspA
+			jive$lik$prop$msp				<- make.proposal("SlidingWindow") 
+			jive$lik$prop$ssp				<- make.proposal("SlidingWindow")
 				
 		}
 		
@@ -123,6 +125,8 @@ jiveMake <- function(simmap, traits, model.var="OU1", model.mean="BM", model.lik
 			jive$prior_mean$ws	  			<- initWinSizeMBM(jive$data$traits)  # check
 			jive$prior_mean$hprior$r		<- make.hpfun("Gamma", c(1.1,5))		  # sigma
 			jive$prior_mean$hprior$m		<- make.hpfun("Uniform", c(-10000,10000)) # anc.mean
+			jive$prior_mean$prop$r					<- make.proposal("slidingWinAbs") 
+			jive$prior_mean$prop$m					<- make.proposal("SlidingWindow")
 
 		
 		}
@@ -132,7 +136,9 @@ jiveMake <- function(simmap, traits, model.var="OU1", model.mean="BM", model.lik
 			jive$prior_var$init  			<- initParamVBM(jive$data$traits) # check
 			jive$prior_var$ws	  			<- initWinSizeVBM(jive$data$traits) # check
 			jive$prior_var$hprior$r			<- make.hpfun("Gamma", c(1.1,5)) # sigma
-			jive$prior_var$hprior$m			<- make.hpfun("Gamma", c(1.1,5)) # anc.mean
+			jive$prior_var$hprior$m			<- make.hpfun("Normal", c(0,10)) # anc.mean
+			jive$prior_var$prop$r					<- make.proposal("slidingWinAbs") 
+			jive$prior_var$prop$m					<- make.proposal("SlidingWindow")
 			jive$prior_var$header			<- c("real.iter", "postA", "log.lik", "Prior_mean", "Prior_var",  "sumHpriorA", 
 												"mbm_sig.sq", "mbm_anc.st",  "vbm_sig.sq", "vbm_anc.st", 
 												paste(rownames(jive$data$traits), "_m", sep=""),
@@ -148,11 +154,20 @@ jiveMake <- function(simmap, traits, model.var="OU1", model.mean="BM", model.lik
 			jive$prior_var$ws	  			<- initWinSizeVOU(jive$data$traits, jive$data$nreg)  # check
 			jive$prior_var$hprior$a			<- make.hpfun("Gamma", c(1.1,5)) # alpha
 			jive$prior_var$hprior$r			<- make.hpfun("Gamma", c(1.1,5)) # sigma
-			jive$prior_var$hprior$m			<- make.hpfun("Gamma", c(1.1,5)) # anc.mean
+			jive$prior_var$hprior$m			<- make.hpfun("Normal", c(0,10)) # anc.mean
 			for (i in 1:jive$data$nreg){									 # theta
 				ti = paste("t",i,sep="")
-				jive$prior_var$hprior[[ti]]	<- make.hpfun("Gamma", c(1.1,5))
+				jive$prior_var$hprior[[ti]]	<- make.hpfun("Normal", c(0,10))
 			}
+			jive$prior_var$prop$a					<- make.proposal("slidingWinAbs") 
+			jive$prior_var$prop$r					<- make.proposal("slidingWinAbs") 
+			jive$prior_var$prop$m					<- make.proposal("SlidingWindow")
+			for (i in 1:jive$data$nreg){									 # theta
+				ti = paste("t",i,sep="")
+				jive$prior_var$prop[[ti]]	<- make.proposal("SlidingWindow")
+			}
+			
+			
 			jive$prior_var$header			<- c("real.iter", "postA", "log.lik", "Prior_mean", "Prior_var",  "sumHpriorA", 
 												"mbm_sig.sq", "mbm_anc.st", "vou_alpha", "vou_sig.sq", "vou_anc.st", 
 												paste("vou_theta", seq(1:jive$data$nreg),sep=""),

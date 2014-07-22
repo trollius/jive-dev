@@ -92,10 +92,12 @@ jiveMCMC <- function(jive, log.file="jive_mcmc.log", sampling.freq=1000, print.f
 							
 							 if (runif(1) < 0.5) {
 								  # updating random 5 values from the vector of means 
-								  msp[ind] <- slidingWin(mspA[ind], jive$lik$mspws[ind]) 
+								  msp[ind] <- jive$lik$prop$msp(i=mspA[ind], d=jive$lik$mspws[ind])
+
 							 } else {
 								  # updating random 5 values from the vector of sigmas
-								  ssp[ind] <- abs(slidingWin(sspA[ind], jive$lik$sspws[ind]))
+								  ssp[ind] <- jive$lik$prop$ssp(i=sspA[ind], d=jive$lik$sspws[ind])
+
 							 }
 						}
 						# update MVN parameters <-----------------------------  code refactoring is needed to allow other than BM models
@@ -134,7 +136,7 @@ jiveMCMC <- function(jive, log.file="jive_mcmc.log", sampling.freq=1000, print.f
 						# do this for first step always (because we need to have all probabiliiles)     
 						if (r < update.freq[1] || real.iter == 1) {
 						
-							 Lik 		<- jive$lik$model(msp, ssp, jive$data$traits, jive$data$counts) # traits, counts
+							 Lik 		<- jive$lik$model(msp, exp(ssp), jive$data$traits, jive$data$counts) # traits, counts
 							 #print(Lik)
 							 Prior_mean <- jive$prior_mean$model(c(smvn, mmvn), msp, jive$data$tree) # tree Conditional prior level
 							 #print(paste("Prior mean ", Prior_mean))
